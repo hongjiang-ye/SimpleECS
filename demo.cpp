@@ -1,5 +1,5 @@
 ﻿#include <iostream>
-#include "ECS.h"
+#include "ECS/ECS.h"
 
 struct Position
 {

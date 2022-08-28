@@ -1,13 +1,23 @@
-﻿cmake_minimum_required(VERSION 3.5)
+﻿cmake_minimum_required(VERSION 3.14)
 
-project (EcsDemo)
+project (ecs_demo)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# The header-only ECS library
+add_library(ecs INTERFACE)
+target_include_directories(ecs
+    INTERFACE
+        ${PROJECT_SOURCE_DIR}/include/
+)
+
+# The gtest
+enable_testing()
+add_subdirectory(test)
+
+# The demo
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/demo.cpp)
-
-target_include_directories(${PROJECT_NAME}
-    PRIVATE 
-        ${PROJECT_SOURCE_DIR}/src
+target_link_libraries(${PROJECT_NAME}
+    PRIVATE
+        ecs
 )
