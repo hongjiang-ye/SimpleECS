@@ -1,11 +1,12 @@
 #pragma once
 
 
-namespace ECS {
-
+namespace ECS
+{
 	class World;
 
-	class System {
+	class System
+	{
 	public:
 		friend class World;
 

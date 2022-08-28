@@ -7,10 +7,11 @@
 #include "Archetype.h"
 
 
-namespace ECS {
-
+namespace ECS
+{
 	// Manage all archetypes that are existing or once existed in the current world.
-	class ArchetypeManager {
+	class ArchetypeManager
+	{
 	public:
 
 		ArchetypeManager() {}
@@ -19,34 +20,39 @@ namespace ECS {
 		ArchetypeManager(const ArchetypeManager&) = delete;
 		ArchetypeManager operator=(const ArchetypeManager&) = delete;
 
-		void Init(ComponentTypeManager* c_mgr_ptr) {
+		void Init(ComponentTypeManager* c_mgr_ptr)
+		{
 			this->c_mgr_ptr = c_mgr_ptr;
 		}
 
-		ArchetypeID CreateArchetype(const ComponentTypeIDSet& c_id_set) {
+		ArchetypeID CreateArchetype(const ComponentTypeIDSet& c_id_set)
+		{
 			assert(archetype_id_by_component_set.count(c_id_set) == 0);
 
 			ArchetypeID new_a_id = this->archetype_id_counter++;
 			archetype_id_by_component_set.insert({ c_id_set,  new_a_id });
 			archetypes.push_back(Archetype(new_a_id, c_id_set));
-			
+
 			assert(archetypes.size() == archetype_id_counter);
-			
+
 			return new_a_id;
 		}
 
-		ArchetypeID GetOrCreateArchetype(const ComponentTypeIDSet& c_id_set) {
+		ArchetypeID GetOrCreateArchetype(const ComponentTypeIDSet& c_id_set)
+		{
 			if (archetype_id_by_component_set.count(c_id_set) == 0) {
 				this->CreateArchetype(c_id_set);
 			}
 			return archetype_id_by_component_set.at(c_id_set);
 		}
 
-		const Archetype& GetArchtype(const ArchetypeID& a_id) const {
+		const Archetype& GetArchtype(const ArchetypeID& a_id) const
+		{
 			return archetypes[a_id];
 		}
 
-		ArchetypeIDSet GetArchetypeContains(const ComponentTypeIDSet& c_id_set) {
+		ArchetypeIDSet GetArchetypeContains(const ComponentTypeIDSet& c_id_set)
+		{
 			ArchetypeIDSet a_id_set{};
 			for (const auto& pair : archetype_id_by_component_set) {
 				// check if a subset (we can do better if change the underlying data structure)
@@ -64,7 +70,8 @@ namespace ECS {
 			return a_id_set;
 		}
 
-		void PrintArchetypesInfo() const {
+		void PrintArchetypesInfo() const
+		{
 			cout << "\n====== Archetype Info ======" << endl;
 
 			cout << "World has " << archetypes.size() << " archetypes:" << endl;

@@ -8,13 +8,15 @@ using std::endl;
 #include "ComponentType.h"
 
 
-namespace ECS {
-
-	namespace Internal {
+namespace ECS
+{
+	namespace Internal
+	{
 		// Extract the type information (an identifier and a name), through RTTI or compile-time processing;
 		// Current version: generate an ID and name for type T by RTTI.
 		template <typename T>
-		std::pair<size_t, std::string> GetTypeInfo() {
+		std::pair<size_t, std::string> GetTypeInfo()
+		{
 			std::type_index c_rtti_type_index = std::type_index(typeid(T));
 			size_t internal_id = c_rtti_type_index.hash_code();
 			std::string name = c_rtti_type_index.name();
@@ -23,7 +25,8 @@ namespace ECS {
 		}
 	}
 
-	class ComponentTypeManager {
+	class ComponentTypeManager
+	{
 	public:
 
 		ComponentTypeManager() {}
@@ -34,12 +37,14 @@ namespace ECS {
 
 		void Init() {}
 
-		const ComponentType& GetComponentType(ComponentTypeID c_id) const {
+		const ComponentType& GetComponentType(ComponentTypeID c_id) const
+		{
 			return this->component_types[c_id];
 		}
 
 		template <typename T>
-		ComponentTypeID GetComponentTypeID() const {
+		ComponentTypeID GetComponentTypeID() const
+		{
 			auto type_info = Internal::GetTypeInfo<T>();
 			size_t internal_id = type_info.first;
 
@@ -47,7 +52,8 @@ namespace ECS {
 		}
 
 		template <typename T>
-		ComponentTypeID GetOrCreateComponentTypeID() {
+		ComponentTypeID GetOrCreateComponentTypeID()
+		{
 			auto type_info = Internal::GetTypeInfo<T>();
 			size_t internal_id = type_info.first;
 			std::string name = type_info.second;
@@ -65,12 +71,13 @@ namespace ECS {
 			return component_ids_by_internal_id.at(internal_id);
 		}
 
-		void PrintComponentTypesInfo() const {
+		void PrintComponentTypesInfo() const
+		{
 			cout << "\n====== Component Type Info ======" << endl;
 
 			cout << "World has " << this->component_types.size() << " component types:" << endl;
 			for (const auto& c_type : this->component_types) {
-				cout << "ComponentType ID " << c_type.id 
+				cout << "ComponentType ID " << c_type.id
 					<< ": Name: " << c_type.name << ", Size: " << c_type.size << endl;
 			}
 		}

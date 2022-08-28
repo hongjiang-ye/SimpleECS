@@ -11,9 +11,10 @@ using std::endl;
 #include "ArchetypeManager.h"
 
 
-namespace ECS {
-
-	struct EntityIndex {
+namespace ECS
+{
+	struct EntityIndex
+	{
 		EntityIndex() : chunk_index(-1), col_index(-1) {}
 		EntityIndex(size_t chunk_index, size_t col_index) : chunk_index(chunk_index), col_index(col_index) {}
 
@@ -21,23 +22,27 @@ namespace ECS {
 		size_t col_index;
 	};
 
-	inline bool operator==(const EntityIndex& lhs, const EntityIndex& rhs) { 
-		return lhs.chunk_index == rhs.chunk_index && lhs.col_index == rhs.col_index; 
+	inline bool operator==(const EntityIndex& lhs, const EntityIndex& rhs)
+	{
+		return lhs.chunk_index == rhs.chunk_index && lhs.col_index == rhs.col_index;
 	}
 
-	inline bool operator!=(const EntityIndex& lhs, const EntityIndex& rhs) {
+	inline bool operator!=(const EntityIndex& lhs, const EntityIndex& rhs)
+	{
 		return !(lhs == rhs);
 	}
 
 	// Manage the archetype's storage-related information and chunk storage.
-	struct ArchetypeStorage {
+	struct ArchetypeStorage
+	{
 
 		// Avoid unintentional copy and default construction
 		ArchetypeStorage() = delete;
 		ArchetypeStorage(const ArchetypeStorage&) = delete;
 		ArchetypeStorage operator=(const ArchetypeStorage&) = delete;
 
-		ArchetypeStorage(const ComponentTypeManager* c_mgr_ptr, const ArchetypeManager* a_mgr_ptr, const ArchetypeID& a_id) {
+		ArchetypeStorage(const ComponentTypeManager* c_mgr_ptr, const ArchetypeManager* a_mgr_ptr, const ArchetypeID& a_id)
+		{
 			const Archetype& archetype = a_mgr_ptr->GetArchtype(a_id);
 			const ComponentTypeIDSet& c_id_set = archetype.GetComponentTypeIDs();
 
@@ -48,7 +53,7 @@ namespace ECS {
 			for (const auto& c_id : c_id_set) {
 				component_types.push_back(c_id);
 				component_type_index_by_id.insert({ c_id, row_index });
-				
+
 				size_t c_size = c_mgr_ptr->GetComponentType(c_id).size;
 				row_sizeofs.push_back(c_size);
 
@@ -60,12 +65,14 @@ namespace ECS {
 			this->CreateNewChunk();
 		}
 
-		void AddEntity(const Entity& new_entity) {
+		void AddEntity(const Entity& new_entity)
+		{
 			EntityIndex new_e_index = this->GetEmptyEntityIndex();
 			AddEntityToIndex(new_entity, new_e_index);
 		}
 
-		void* GetComponentDataAddress(const Entity& entity, const ComponentTypeID& c_id) {
+		void* GetComponentDataAddress(const Entity& entity, const ComponentTypeID& c_id)
+		{
 			assert(component_type_index_by_id.count(c_id) != 0);
 			size_t row_index = component_type_index_by_id[c_id];
 			EntityIndex e_index = entity_indices[entity];
@@ -73,7 +80,8 @@ namespace ECS {
 			return GetComponentDataAddress(e_index, row_index);
 		}
 
-		void MigrateEntity(const Entity& entity, ArchetypeStorage* const dest_a_storage_ptr) {
+		void MigrateEntity(const Entity& entity, ArchetypeStorage* const dest_a_storage_ptr)
+		{
 			EntityIndex src_e_index = entity_indices.at(entity);
 			EntityIndex dest_e_index = dest_a_storage_ptr->GetEmptyEntityIndex();
 
@@ -84,7 +92,8 @@ namespace ECS {
 
 		// Erase an entity's data, and fill the hole with the last entry of data at the current chunk
 		// to keep the entity data continuous.
-		void RemoveEntityData(const Entity& entity) {
+		void RemoveEntityData(const Entity& entity)
+		{
 			EntityIndex e_index = entity_indices.at(entity);
 
 			EntityIndex last_e_index(e_index.chunk_index, cur_entity_count[e_index.chunk_index] - 1);
@@ -103,7 +112,8 @@ namespace ECS {
 		// Copy all entities (potential performance issue to be addressed!)
 		// Must copy the entities instead of using an indirect link, because the entity storage 
 		// may be altered during ForEach update.
-		std::vector<Entity> GetEntities() {
+		std::vector<Entity> GetEntities()
+		{
 			std::vector<Entity> entities;
 			for (size_t i = 0; i < chunks.size(); i++) {
 				for (size_t j = 0; j < cur_entity_count[i]; j++) {
@@ -113,7 +123,8 @@ namespace ECS {
 			return entities;
 		}
 
-		void PrintInfo() const {
+		void PrintInfo() const
+		{
 			cout << "Has " << component_types.size() << " components (rows):" << endl;;
 			for (size_t i = 0; i < component_types.size(); i++) {
 				cout << "\tCID: " << component_types[i] << " Size: " << row_sizeofs[i] << endl;
@@ -131,13 +142,15 @@ namespace ECS {
 
 	private:
 
-		void CreateNewChunk() {
+		void CreateNewChunk()
+		{
 			chunks.push_back(new Chunk(chunk_size));
 			cur_entity_count.push_back(0);
 			archetype_entities.push_back(std::vector<Entity>(chunk_entity_capacity));
 		}
 
-		void AddEntityToIndex(const Entity& new_entity, const EntityIndex& e_index) {
+		void AddEntityToIndex(const Entity& new_entity, const EntityIndex& e_index)
+		{
 			assert(entity_indices.count(new_entity) == 0);
 
 			archetype_entities[e_index.chunk_index][e_index.col_index] = new_entity;
@@ -146,11 +159,13 @@ namespace ECS {
 		}
 
 		// Computer the data component address by given chunk_index, column_index (entity) and row_index (component).
-		void* GetComponentDataAddress(const EntityIndex& e_index, size_t row_index) {
+		void* GetComponentDataAddress(const EntityIndex& e_index, size_t row_index)
+		{
 			return chunks[e_index.chunk_index]->GetAddress(row_index, e_index.col_index, row_sizeofs, chunk_entity_capacity);
 		}
 
-		void CopyEntityData(const EntityIndex& src_e_index, const EntityIndex& dest_e_index, ArchetypeStorage* const dest_a_storage_ptr) {
+		void CopyEntityData(const EntityIndex& src_e_index, const EntityIndex& dest_e_index, ArchetypeStorage* const dest_a_storage_ptr)
+		{
 			const std::vector<ComponentTypeID>& dest_component_types = dest_a_storage_ptr->component_types;
 
 			for (const auto& c_id : dest_component_types) {
@@ -165,7 +180,8 @@ namespace ECS {
 			}
 		}
 
-		EntityIndex GetEmptyEntityIndex() {
+		EntityIndex GetEmptyEntityIndex()
+		{
 			for (size_t i = 0; i < cur_entity_count.size(); i++) {
 				if (cur_entity_count[i] < chunk_entity_capacity) {
 					return EntityIndex(i, cur_entity_count[i]);

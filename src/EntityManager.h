@@ -8,11 +8,12 @@ using std::endl;
 #include "ComponentStorageManager.h"
 
 
-namespace ECS {
-
+namespace ECS
+{
 	const Entity NULL_ENTITY;  // The default constructed entity should be an invalid entity
 
-	class EntityManager {
+	class EntityManager
+	{
 	public:
 
 		EntityManager() {}
@@ -21,7 +22,8 @@ namespace ECS {
 		EntityManager(const EntityManager&) = delete;
 		EntityManager operator=(const EntityManager&) = delete;
 
-		void Init() {
+		void Init()
+		{
 			component_type_mgr.Init();
 			archetype_mgr.Init(&component_type_mgr);
 			storage_mgr.Init(&component_type_mgr, &archetype_mgr);
@@ -29,20 +31,22 @@ namespace ECS {
 
 		// Create an entity with the specified combination of component types, and their data are defaultly constructed.
 		template <typename... Args>
-		Entity CreateEntity() {
+		Entity CreateEntity()
+		{
 			Entity new_entity = Entity(entity_id_counter++);
 			entities.insert(new_entity);
-			
-			ComponentTypeIDSet c_id_set = ComponentTypeIDSet{ component_type_mgr.GetOrCreateComponentTypeID<Args>()...};
+
+			ComponentTypeIDSet c_id_set = ComponentTypeIDSet{ component_type_mgr.GetOrCreateComponentTypeID<Args>()... };
 			ArchetypeID a_id = archetype_mgr.GetOrCreateArchetype(c_id_set);
-			
+
 			storage_mgr.AddEntity<Args...>(new_entity, a_id);
 
 			return new_entity;
 		}
 
 		// Create an entity with no component type
-		Entity CreateEntity() {
+		Entity CreateEntity()
+		{
 			Entity new_entity = Entity(entity_id_counter++);
 			null_entities.insert(new_entity);
 
@@ -51,21 +55,22 @@ namespace ECS {
 
 		// Add a new component (or replace the old one) to an entity.
 		template <typename T, typename... Args>
-		void AddEntityComponent(const Entity& entity, const Args&... args) {
+		void AddEntityComponent(const Entity& entity, const Args&... args)
+		{
 
 			// T is component type
 			ComponentTypeID add_c_id = component_type_mgr.GetOrCreateComponentTypeID<T>();
-			
+
 			if (null_entities.count(entity) != 0) {
 				// the entity has no component yet
 				ArchetypeID a_id = archetype_mgr.GetOrCreateArchetype(ComponentTypeIDSet{ add_c_id });
 				storage_mgr.AddEntity<T>(entity, a_id);
-				
+
 				null_entities.erase(entity);
 				entities.insert(entity);
 			}
 			else {
-				if (!storage_mgr.HasComponentType(entity, add_c_id)) {  
+				if (!storage_mgr.HasComponentType(entity, add_c_id)) {
 					// the entity doesn't have this component yet
 					ArchetypeID old_a_id = storage_mgr.GetEntityArchetypeID(entity);
 					ComponentTypeIDSet c_id_set = archetype_mgr.GetArchtype(old_a_id).GetComponentTypeIDs();
@@ -81,19 +86,21 @@ namespace ECS {
 
 		// Set a new component value fpr an entity.
 		template <typename T, typename... Args>
-		void SetEntityComponent(const Entity& entity, const Args&... args) {
+		void SetEntityComponent(const Entity& entity, const Args&... args)
+		{
 			storage_mgr.SetEntityComponent<T, Args...>(entity, args...);
 		}
 
 		// Get the pointer to the component type T of an entity.
 		template <typename T>
-		T* GetEntityComponent(const Entity& entity) {
+		T* GetEntityComponent(const Entity& entity)
+		{
 			return storage_mgr.GetEntityComponent<T>(entity);
 		}
 
 		// Whether an entity has component T.
 		template <typename T>
-		bool HasComponent(const Entity& entity) 
+		bool HasComponent(const Entity& entity)
 		{
 			ComponentTypeID c_id = component_type_mgr.GetOrCreateComponentTypeID<T>();
 			return storage_mgr.HasComponentType(entity, c_id);
@@ -101,7 +108,7 @@ namespace ECS {
 
 		// Whether an entity has the list of components.
 		template <typename T, typename V, typename... Args>
-		bool HasComponent(const Entity& entity) 
+		bool HasComponent(const Entity& entity)
 		{
 			ComponentTypeIDSet c_id_set = ComponentTypeIDSet{ component_type_mgr.GetOrCreateComponentTypeID<T>(),
 				component_type_mgr.GetOrCreateComponentTypeID<V>(),
@@ -118,14 +125,15 @@ namespace ECS {
 
 		// Remove the component T from an entity.
 		template <typename T>
-		void RemoveEntityComponent(const Entity& entity) {
+		void RemoveEntityComponent(const Entity& entity)
+		{
 			ComponentTypeID remove_c_id = component_type_mgr.GetOrCreateComponentTypeID<T>();
 
 			if (null_entities.count(entity) != 0 || !storage_mgr.HasComponentType(entity, remove_c_id)) {
 				// Nothing to remove;
 				return;
 			}
-			
+
 			// the entity doesn't have this component yet
 			ArchetypeID old_a_id = storage_mgr.GetEntityArchetypeID(entity);
 			ComponentTypeIDSet c_id_set = archetype_mgr.GetArchtype(old_a_id).GetComponentTypeIDs();
@@ -141,18 +149,21 @@ namespace ECS {
 		}
 
 		// Remove all components from an entity
-		void RemoveEntityAllComponents(const Entity& entity) {
+		void RemoveEntityAllComponents(const Entity& entity)
+		{
 			storage_mgr.RemoveEntity(entity);
 			null_entities.insert(entity);
 			entities.erase(entity);
 		}
 
-		std::unordered_set<Entity>& GetEntities() {
+		std::unordered_set<Entity>& GetEntities()
+		{
 			return entities;
 		}
 
 		// For debug
-		void PrintEntitiesInfo() const {
+		void PrintEntitiesInfo() const
+		{
 			cout << "World has " << entities.size() << " entities: ID ";
 			for (auto const& entity : entities) {
 				cout << entity.id << ", ";
@@ -160,20 +171,24 @@ namespace ECS {
 			cout << endl;
 		}
 
-		void PrintComponentTypesInfo() const {
+		void PrintComponentTypesInfo() const
+		{
 			this->component_type_mgr.PrintComponentTypesInfo();
 		}
 
-		void PrintArchetypesInfo() const {
+		void PrintArchetypesInfo() const
+		{
 			this->archetype_mgr.PrintArchetypesInfo();
 		}
 
-		void PrintComponentStorageInfo() const{
+		void PrintComponentStorageInfo() const
+		{
 			this->storage_mgr.PrintComponentStorageInfo();
 		}
 
 		template <typename F, typename... Args>
-		void ForEach(F func) {
+		void ForEach(F func)
+		{
 			// 要考虑遍历时对 entity 的增删的问题。
 			ComponentTypeIDSet c_id_set = { component_type_mgr.GetOrCreateComponentTypeID<Args>()... };
 

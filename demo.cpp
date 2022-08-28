@@ -1,7 +1,8 @@
 ﻿#include <iostream>
 #include "ECS.h"
 
-struct Position {
+struct Position
+{
 	// Components must have a default constructor.
 	Position() : x(10.0), y(10.0) {}
 
