@@ -1,11 +1,6 @@
 # SimpleECS
 
-TODO: 
-
-* googletest
-* 粒子demo
-
-A simple Entity Component System (ECS) engine implemented in C++. 
+A simple Entity Component System (ECS) framework implemented in C++. 
 
 This library has not tested for any production purpose, and is mostly a wheel built for trying to implement some basic functions of ECS.
 
@@ -22,9 +17,10 @@ This library has not tested for any production purpose, and is mostly a wheel bu
 
 ```c++
 #include <iostream>
-#include "ECS.h"
+#include "ECS/ECS.h"
 
-struct Position {
+struct Position
+{
 	// Components must have a default constructor.
 	Position() : x(10.0), y(10.0) {}
 
@@ -135,6 +131,7 @@ The overall architecture of the implemented ECS is roughly illustrated as follow
 
 ## Possible TODOs
 
+* Make a particle system demo (CPU needs to handle a massive amount of physics computation)
 * Try to reduce the RTTI (such as support for compile-time component registration) and template instantiation overheads.
 * Faster entity iterators for `ForEach` call.
 * Implement an event system to allow communication between systems.

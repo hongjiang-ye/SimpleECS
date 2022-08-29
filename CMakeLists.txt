@@ -12,12 +12,11 @@ target_include_directories(ecs
 )
 
 # The gtest
-enable_testing()
-add_subdirectory(test)
+#enable_testing()
+#add_subdirectory(test)
 
-# The demo
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/demo.cpp)
-target_link_libraries(${PROJECT_NAME}
-    PRIVATE
-        ecs
-)
+# The basic_usage demo
+#if (MUDUO_BUILD_EXAMPLES)
+    
+#endif()
+add_subdirectory(${PROJECT_SOURCE_DIR}/examples)
